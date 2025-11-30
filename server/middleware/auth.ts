@@ -45,6 +45,10 @@ export const checkUser: Middleware = async (req, _res, next) => {
     }
 
     user = await userRepository.findOne({ where: { id: userId } });
+  } else if (req.session?.userId) {
+    user = await userRepository.findOne({
+      where: { id: req.session.userId },
+    });
   } else if (
     settings.network.trustProxy &&
     settings.network.forwardAuth.enabled &&
@@ -114,11 +118,10 @@ export const checkUser: Middleware = async (req, _res, next) => {
       user = await userRepository.save(newUser);
     }
 
-  } else if (req.session?.userId) {
-    user = await userRepository.findOne({
-      where: { id: req.session.userId },
-    });
-  }
+    if (user && req.session) {
+      req.session.userId = user.id;
+    }
+  } 
 
   if (user) {
     req.user = user;
