@@ -268,7 +268,6 @@ components:
           example: false
         trustProxy:
           type: boolean
-<<<<<<< HEAD:jellyseerr-api.yml
           example: true
         trustedProxies:
           type: object
@@ -278,15 +277,12 @@ components:
             v6:
               type: array
         forwardAuth:
-=======
           example: false
         proxy:
->>>>>>> upstream-upstream/develop:seerr-api.yml
           type: object
           properties:
             enabled:
               type: boolean
-<<<<<<< HEAD:jellyseerr-api.yml
             userHeader:
               type: string
               example: 'Remote-User'
@@ -294,7 +290,6 @@ components:
               type: string
               example: 'Remote-Email'
               nullable: true
-=======
               example: false
             hostname:
               type: string
@@ -329,7 +324,6 @@ components:
             forceMaxTtl:
               type: number
               example: -1
->>>>>>> upstream-upstream/develop:seerr-api.yml
     PlexLibrary:
       type: object
       properties:
