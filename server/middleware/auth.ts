@@ -51,22 +51,15 @@ export const checkUser: Middleware = async (req, _res, next) => {
     trustedProxy
   ) {
     const userValue =
-      (settings.network.forwardAuth.userHeader != '' &&
-        req.header(settings.network.forwardAuth.userHeader)) ??
-      '';
+      settings.network.forwardAuth.userHeader ?
+        req.header(settings.network.forwardAuth.userHeader) || undefined : undefined;
     const emailValue =
-      (settings.network.forwardAuth.emailHeader != '' &&
-        req.header(settings.network.forwardAuth.emailHeader)) ??
-      '';
+      settings.network.forwardAuth.emailHeader ?
+        req.header(settings.network.forwardAuth.emailHeader) || undefined : undefined;
 
     let query: object[] = [];
 
-    if (
-      settings.network.forwardAuth.emailHeader != '' &&
-      settings.network.forwardAuth.userHeader != '' &&
-      emailValue != '' &&
-      userValue != ''
-    ) {
+    if (emailValue && userValue) {
       // email & user header was specified so we must verify both
       query = [
         {
@@ -82,10 +75,7 @@ export const checkUser: Middleware = async (req, _res, next) => {
           email: emailValue,
         },
       ];
-    } else if (
-      settings.network.forwardAuth.userHeader != '' &&
-      userValue != ''
-    ) {
+    } else if (userValue) {
       query = [
         {
           username: userValue,
@@ -97,10 +87,7 @@ export const checkUser: Middleware = async (req, _res, next) => {
           plexUsername: userValue,
         },
       ];
-    } else if (
-      settings.network.forwardAuth.emailHeader != '' &&
-      emailValue != ''
-    ) {
+    } else if (emailValue) {
       query = [
         {
           email: emailValue,
@@ -114,7 +101,8 @@ export const checkUser: Middleware = async (req, _res, next) => {
       });
     }
 
-    if (!user && (emailValue != '' || userValue != '')) {
+    // Create if user is not found and email is provided (email is unique)
+    if (!user && emailValue) {
       const newUser = new User({
         email: emailValue,
         username: userValue,
