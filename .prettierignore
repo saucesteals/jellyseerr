@@ -2,13 +2,17 @@
 .next/
 dist/
 config/
-CHANGELOG.md
 pnpm-lock.yaml
+cypress/config/settings.cypress.json
 
 # assets
 src/assets/
 public/
+!public/sw.js
 docs/
+!/public/
+/public/*
+!/public/sw.js
 
 # helm charts
 **/charts

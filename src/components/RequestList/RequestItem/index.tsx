@@ -343,7 +343,9 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
 
   const deleteMediaFile = async () => {
     if (request.media) {
-      await axios.delete(`/api/v1/media/${request.media.id}/file`);
+      await axios.delete(
+        `/api/v1/media/${request.media.id}/file?is4k=${request.is4k}`
+      );
       await axios.delete(`/api/v1/media/${request.media.id}`);
       revalidateList();
     }
@@ -438,7 +440,7 @@ const RequestItem = ({ request, revalidateList }: RequestItemProps) => {
                 src={
                   title.posterPath
                     ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${title.posterPath}`
-                    : '/images/jellyseerr_poster_not_found.png'
+                    : '/images/seerr_poster_not_found.png'
                 }
                 alt=""
                 sizes="100vw"

@@ -30,7 +30,7 @@ const messages = defineMessages('components.Settings', {
   plex: 'Plex',
   plexsettings: 'Plex Settings',
   plexsettingsDescription:
-    'Configure the settings for your Plex server. Jellyseerr scans your Plex libraries to determine content availability.',
+    'Configure the settings for your Plex server. Seerr scans your Plex libraries to determine content availability.',
   serverpreset: 'Server',
   serverLocal: 'local',
   serverRemote: 'remote',
@@ -51,12 +51,12 @@ const messages = defineMessages('components.Settings', {
   enablessl: 'Use SSL',
   plexlibraries: 'Plex Libraries',
   plexlibrariesDescription:
-    'The libraries Jellyseerr scans for titles. Set up and save your Plex connection settings, then click the button below if no libraries are listed.',
+    'The libraries Seerr scans for titles. Set up and save your Plex connection settings, then click the button below if no libraries are listed.',
   scanning: 'Syncing…',
   scan: 'Sync Libraries',
   manualscan: 'Manual Library Scan',
   manualscanDescription:
-    "Normally, this will only be run once every 24 hours. Jellyseerr will check your Plex server's recently added more aggressively. If this is your first time configuring Plex, a one-time full manual library scan is recommended!",
+    "Normally, this will only be run once every 24 hours. Seerr will check your Plex server's recently added more aggressively. If this is your first time configuring Plex, a one-time full manual library scan is recommended!",
   notrunning: 'Not Running',
   currentlibrary: 'Current Library: {name}',
   librariesRemaining: 'Libraries Remaining: {count}',
@@ -69,7 +69,7 @@ const messages = defineMessages('components.Settings', {
     'Optionally direct users to the web app on your server instead of the "hosted" web app',
   tautulliSettings: 'Tautulli Settings',
   tautulliSettingsDescription:
-    'Optionally configure the settings for your Tautulli server. Jellyseerr fetches watch history data for your Plex media from Tautulli.',
+    'Optionally configure the settings for your Tautulli server. Seerr fetches watch history data for your Plex media from Tautulli.',
   urlBase: 'URL Base',
   tautulliApiKey: 'API Key',
   externalUrl: 'External URL',
@@ -136,11 +136,7 @@ const SettingsPlex = ({ onComplete }: SettingsPlexProps) => {
   const PlexSettingsSchema = Yup.object().shape({
     hostname: Yup.string()
       .nullable()
-      .required(intl.formatMessage(messages.validationHostnameRequired))
-      .matches(
-        /^(((([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])):((([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))@)?(([a-z]|\d|_|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*)?([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])$/i,
-        intl.formatMessage(messages.validationHostnameRequired)
-      ),
+      .required(intl.formatMessage(messages.validationHostnameRequired)),
     port: Yup.number()
       .nullable()
       .required(intl.formatMessage(messages.validationPortRequired)),

@@ -118,9 +118,11 @@ const ManageSlideOver = ({
     }
   };
 
-  const deleteMediaFile = async () => {
+  const deleteMediaFile = async (is4k = false) => {
     if (data.mediaInfo) {
-      await axios.delete(`/api/v1/media/${data.mediaInfo.id}/file`);
+      await axios.delete(
+        `/api/v1/media/${data.mediaInfo.id}/file?is4k=${is4k}`
+      );
       await axios.delete(`/api/v1/media/${data.mediaInfo.id}`);
       revalidate();
       onClose();
@@ -141,6 +143,31 @@ const ManageSlideOver = ({
           sonarrData?.find(
             (sonarr) =>
               sonarr.isDefault && sonarr.id === data.mediaInfo?.serviceId
+          ) !== undefined
+        );
+      }
+    }
+    return false;
+  };
+
+  const isDefault4kService = () => {
+    if (data.mediaInfo) {
+      if (data.mediaInfo.mediaType === MediaType.MOVIE) {
+        return (
+          radarrData?.find(
+            (radarr) =>
+              radarr.isDefault &&
+              radarr.is4k &&
+              radarr.id === data.mediaInfo?.serviceId4k
+          ) !== undefined
+        );
+      } else {
+        return (
+          sonarrData?.find(
+            (sonarr) =>
+              sonarr.isDefault &&
+              sonarr.is4k &&
+              sonarr.id === data.mediaInfo?.serviceId4k
           ) !== undefined
         );
       }
@@ -414,7 +441,7 @@ const ManageSlideOver = ({
                   isDefaultService() && (
                     <div>
                       <ConfirmButton
-                        onClick={() => deleteMediaFile()}
+                        onClick={() => deleteMediaFile(false)}
                         confirmText={intl.formatMessage(
                           globalMessages.areyousure
                         )}
@@ -570,10 +597,10 @@ const ManageSlideOver = ({
                         </span>
                       </Button>
                     </a>
-                    {isDefaultService() && (
+                    {isDefault4kService() && (
                       <div>
                         <ConfirmButton
-                          onClick={() => deleteMediaFile()}
+                          onClick={() => deleteMediaFile(true)}
                           confirmText={intl.formatMessage(
                             globalMessages.areyousure
                           )}

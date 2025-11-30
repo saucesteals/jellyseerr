@@ -9,7 +9,6 @@ import notificationManager from '@server/lib/notifications';
 import DiscordAgent from '@server/lib/notifications/agents/discord';
 import EmailAgent from '@server/lib/notifications/agents/email';
 import GotifyAgent from '@server/lib/notifications/agents/gotify';
-import LunaSeaAgent from '@server/lib/notifications/agents/lunasea';
 import NtfyAgent from '@server/lib/notifications/agents/ntfy';
 import PushbulletAgent from '@server/lib/notifications/agents/pushbullet';
 import PushoverAgent from '@server/lib/notifications/agents/pushover';
@@ -17,6 +16,7 @@ import SlackAgent from '@server/lib/notifications/agents/slack';
 import TelegramAgent from '@server/lib/notifications/agents/telegram';
 import WebhookAgent from '@server/lib/notifications/agents/webhook';
 import WebPushAgent from '@server/lib/notifications/agents/webpush';
+import checkOverseerrMerge from '@server/lib/overseerrMerge';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
 import clearCookies from '@server/middleware/clearcookies';
@@ -26,6 +26,7 @@ import imageproxy from '@server/routes/imageproxy';
 import { appDataPermissions } from '@server/utils/appDataVolume';
 import { getAppVersion } from '@server/utils/appVersion';
 import createCustomProxyAgent from '@server/utils/customProxyAgent';
+import { initializeDnsCache } from '@server/utils/dnsCache';
 import restartFlag from '@server/utils/restartFlag';
 import { getClientIp } from '@supercharge/request-ip';
 import axios from 'axios';
@@ -43,23 +44,28 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
-const API_SPEC_PATH = path.join(__dirname, '../jellyseerr-api.yml');
+const API_SPEC_PATH = path.join(__dirname, '../seerr-api.yml');
 
-logger.info(`Starting Jellyseerr version ${getAppVersion()}`);
+logger.info(`Starting Seerr version ${getAppVersion()}`);
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
 if (!appDataPermissions()) {
   logger.error(
-    'Something went wrong while checking config folder! Please ensure the config folder is set up properly.\nhttps://docs.jellyseerr.dev/getting-started'
+    'Something went wrong while checking config folder! Please ensure the config folder is set up properly.\nhttps://docs.seerr.dev/getting-started'
   );
 }
 
 app
   .prepare()
   .then(async () => {
-    const dbConnection = await dataSource.initialize();
+    // Run Overseerr to Seerr migration
+    await checkOverseerrMerge();
+
+    const dbConnection = dataSource.isInitialized
+      ? dataSource
+      : await dataSource.initialize();
 
     // Run migrations in production
     if (process.env.NODE_ENV === 'production') {
@@ -79,6 +85,14 @@ app
     if (settings.network.forceIpv4First) {
       axios.defaults.httpAgent = new http.Agent({ family: 4 });
       axios.defaults.httpsAgent = new https.Agent({ family: 4 });
+    }
+
+    // Add DNS caching
+    if (settings.network.dnsCache?.enabled) {
+      initializeDnsCache({
+        forceMinTtl: settings.network.dnsCache.forceMinTtl,
+        forceMaxTtl: settings.network.dnsCache.forceMaxTtl,
+      });
     }
 
     // Register HTTP proxy
@@ -113,7 +127,6 @@ app
       new EmailAgent(),
       new GotifyAgent(),
       new NtfyAgent(),
-      new LunaSeaAgent(),
       new PushbulletAgent(),
       new PushoverAgent(),
       new SlackAgent(),

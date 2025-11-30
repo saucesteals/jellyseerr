@@ -12,7 +12,6 @@ import type {
   TmdbGenre,
   TmdbKeywordSearchResponse,
 } from '@server/api/themoviedb/interfaces';
-import type { GenreSliderItem } from '@server/interfaces/api/discoverInterfaces';
 import type { UserResultsResponse } from '@server/interfaces/api/userInterfaces';
 import type {
   Keyword,
@@ -185,9 +184,7 @@ export const GenreSelector = ({
   }, [defaultValue, type]);
 
   const loadGenreOptions = async (inputValue: string) => {
-    const results = await axios.get<GenreSliderItem[]>(
-      `/api/v1/discover/genreslider/${type}`
-    );
+    const results = await axios.get<TmdbGenre[]>(`/api/v1/genres/${type}`);
 
     return results.data
       .map((result) => ({
@@ -201,7 +198,7 @@ export const GenreSelector = ({
 
   return (
     <AsyncSelect
-      key={`genre-select-${defaultDataValue}`}
+      key={`genre-select-${type}-${defaultDataValue}`}
       className="react-select-container"
       classNamePrefix="react-select"
       defaultValue={isMulti ? defaultDataValue : defaultDataValue?.[0]}
@@ -309,16 +306,19 @@ export const KeywordSelector = ({
 
       const keywords = await Promise.all(
         defaultValue.split(',').map(async (keywordId) => {
-          const keyword = await axios.get<Keyword>(
+          const keyword = await axios.get<Keyword | null>(
             `/api/v1/keyword/${keywordId}`
           );
-
           return keyword.data;
         })
       );
 
+      const validKeywords: Keyword[] = keywords.filter(
+        (keyword): keyword is Keyword => keyword !== null
+      );
+
       setDefaultDataValue(
-        keywords.map((keyword) => ({
+        validKeywords.map((keyword) => ({
           label: keyword.name,
           value: keyword.id,
         }))
