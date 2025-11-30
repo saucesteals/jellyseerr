@@ -1,3 +1,4 @@
+import { UserType } from '@server/constants/user';
 import { getRepository } from '@server/datasource';
 import { User } from '@server/entity/User';
 import type {
@@ -69,6 +70,10 @@ export const checkUser: Middleware = async (req, _res, next) => {
       // email & user header was specified so we must verify both
       query = [
         {
+          username: userValue,
+          email: emailValue,
+        },
+        {
           jellyfinUsername: userValue,
           email: emailValue,
         },
@@ -82,6 +87,9 @@ export const checkUser: Middleware = async (req, _res, next) => {
       userValue != ''
     ) {
       query = [
+        {
+          username: userValue,
+        },
         {
           jellyfinUsername: userValue,
         },
@@ -105,6 +113,19 @@ export const checkUser: Middleware = async (req, _res, next) => {
         where: query,
       });
     }
+
+    if (!user && (emailValue != '' || userValue != '')) {
+      const newUser = new User({
+        email: emailValue,
+        username: userValue,
+        permissions: settings.main.defaultPermissions,
+        userType: UserType.LOCAL,
+      });
+
+      
+      user = await userRepository.save(newUser);
+    }
+
   } else if (req.session?.userId) {
     user = await userRepository.findOne({
       where: { id: req.session.userId },
