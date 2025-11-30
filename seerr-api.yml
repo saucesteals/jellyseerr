@@ -290,7 +290,6 @@ components:
               type: string
               example: 'Remote-Email'
               nullable: true
-              example: false
             hostname:
               type: string
               example: ''
